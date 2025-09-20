@@ -1,0 +1,73 @@
+{% extends 'base.html' %}
+{% block title %}Profil Düzenle{% endblock %}
+{% block content %}
+<div class="edit-profile-container">
+    <div class="card">
+        <h2>Profil Düzenle</h2>
+        <form method="post" enctype="multipart/form-data" class="profile-form">
+            <div class="form-group">
+                <label for="avatar">Avatar</label>
+                <div class="avatar-upload">
+                    {% if user.avatar %}
+                        <img src="{{ url_for('static', filename=user.avatar) }}" alt="Mevcut avatar" class="current-avatar">
+                    {% else %}
+                        <div class="avatar-placeholder">
+                            {{ user.username[0].upper() }}
+                        </div>
+                    {% endif %}
+                    <input type="file" id="avatar" name="avatar" accept="image/*" class="file-input">
+                    <label for="avatar" class="file-label">Avatar Değiştir</label>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="username">Kullanıcı Adı</label>
+                <input type="text" id="username" value="{{ user.username }}" disabled class="form-input">
+                <small class="form-help">Kullanıcı adı değiştirilemez</small>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" value="{{ user.email }}" disabled class="form-input">
+                <small class="form-help">Email adresi değiştirilemez</small>
+            </div>
+
+            <div class="form-group">
+                <label for="bio">Hakkımda</label>
+                <textarea id="bio" name="bio" rows="4" class="form-textarea" placeholder="Kendiniz hakkında bir şeyler yazın...">{{ user.bio or '' }}</textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Kaydet</button>
+                <a href="{{ url_for('profile') }}" class="btn secondary">İptal</a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.getElementById('avatar').addEventListener('change', function(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const currentAvatar = document.querySelector('.current-avatar');
+            const placeholder = document.querySelector('.avatar-placeholder');
+            
+            if (currentAvatar) {
+                currentAvatar.src = e.target.result;
+            } else if (placeholder) {
+                placeholder.innerHTML = '';
+                placeholder.style.backgroundImage = `url(${e.target.result})`;
+                placeholder.style.backgroundSize = 'cover';
+                placeholder.style.backgroundPosition = 'center';
+            }
+        };
+        reader.readAsDataURL(file);
+    }
+});
+</script>
+{% endblock %}
+

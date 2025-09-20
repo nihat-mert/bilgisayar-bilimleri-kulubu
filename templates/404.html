@@ -1,0 +1,11 @@
+{% extends 'base.html' %}
+{% block title %}Sayfa Bulunamadı{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 40px; text-align:center;">
+  <h2>404</h2>
+  <p>Aradığınız sayfa bulunamadı.</p>
+  <a class="btn" href="{{ url_for('index') }}">Ana Sayfa</a>
+{% endblock %}
+
+
+

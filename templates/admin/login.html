@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+{% block title %}Admin Giriş{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 20px; max-width: 520px; margin-left:auto; margin-right:auto;">
+  <h2>Admin Giriş</h2>
+  <form class="row" method="post" action="{{ url_for('admin_login') }}">
+    <input type="text" name="username" placeholder="Kullanıcı adı" required>
+    <input type="password" name="password" placeholder="Şifre" required>
+    <button class="btn" type="submit">Giriş Yap</button>
+  </form>
+</section>
+{% endblock %}
+
+
+

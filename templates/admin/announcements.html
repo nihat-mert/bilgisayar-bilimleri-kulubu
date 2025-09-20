@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% block title %}Duyuru Yönetimi{% endblock %}
+{% block content %}
+<section class="grid" style="margin-top: 20px; grid-template-columns: 1fr 1fr;">
+  <div class="card">
+    <h2>Yeni Duyuru Ekle</h2>
+    <form class="row" method="post" action="{{ url_for('admin_announcements') }}" id="announcement-form">
+      <input type="text" name="title" placeholder="Başlık" required>
+      <textarea name="content" placeholder="Duyuru içeriği" required style="min-height: 150px;"></textarea>
+      <button class="btn" type="submit" id="submit-btn">Duyuru Ekle</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Mevcut Duyurular</h2>
+    <div class="grid">
+      {% for it in items %}
+        <article class="card">
+          <h3>{{ it.title }}</h3>
+          <div>{{ it.content|safe }}</div>
+          <div class="grid" style="grid-template-columns: auto auto; gap:8px; margin-top:8px;">
+            <a class="btn" href="{{ url_for('edit_announcement', ann_id=it.id) }}">Düzenle</a>
+            <form method="post" action="{{ url_for('delete_announcement', ann_id=it.id) }}">
+              <button class="btn secondary" type="submit">Sil</button>
+            </form>
+          </div>
+        </article>
+      {% else %}
+        <p class="muted">Henüz duyuru yok.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('announcement-form');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    if (form && submitBtn) {
+      form.addEventListener('submit', (e) => {
+        const title = form.querySelector('input[name="title"]').value.trim();
+        const content = form.querySelector('textarea[name="content"]').value.trim();
+        
+        console.log('Form submit - Title:', title, 'Content:', content); // Debug
+        
+        if (!title) {
+          e.preventDefault();
+          alert('Lütfen başlık girin.');
+          return false;
+        }
+        
+        if (!content) {
+          e.preventDefault();
+          alert('Lütfen duyuru içeriği girin.');
+          return false;
+        }
+        
+        // Butonu devre dışı bırak (çift gönderimi önle)
+        submitBtn.disabled = true;
+        submitBtn.textContent = 'Ekleniyor...';
+        
+        console.log('Form submitting...'); // Debug
+      });
+    }
+  });
+</script>
+{% endblock %}
+
+

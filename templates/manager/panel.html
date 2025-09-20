@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Yönetici Panel{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 20px;">
+  <h2>Yönetici Panel</h2>
+  <p>Bu panelde fotoğraf yükleme ve yazı paylaşımı yapabilirsiniz.</p>
+  
+  <div class="grid" style="grid-template-columns: 1fr 1fr; margin-top: 20px;">
+    <div class="card">
+      <h3>Fotoğraf Yükle</h3>
+      <p>Çoklu fotoğraf yükleme için ana sayfayı kullanın.</p>
+      <a class="btn" href="{{ url_for('index') }}">Ana Sayfaya Git</a>
+    </div>
+    
+    <div class="card">
+      <h3>Yazı Paylaş</h3>
+      <p>Yeni yazı eklemek için ana sayfayı kullanın.</p>
+      <a class="btn" href="{{ url_for('index') }}">Ana Sayfaya Git</a>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+
+
+
+
+
+

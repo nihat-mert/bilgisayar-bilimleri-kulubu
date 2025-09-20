@@ -1,0 +1,97 @@
+{% extends 'base.html' %}
+{% block title %}Profil - {{ user.username }}{% endblock %}
+{% block content %}
+<div class="profile-container">
+    <div class="profile-header">
+        <div class="profile-avatar">
+            {% if user.avatar %}
+                <img src="{{ url_for('static', filename=user.avatar) }}" alt="{{ user.username }}" class="avatar-img">
+            {% else %}
+                <div class="avatar-placeholder">
+                    {{ user.username[0].upper() }}
+                </div>
+            {% endif %}
+        </div>
+        <div class="profile-info">
+            <h1>{{ user.username }}</h1>
+            <p class="user-role">{{ user.role|title }}</p>
+            {% if user.bio %}
+                <p class="user-bio">{{ user.bio }}</p>
+            {% endif %}
+            <div class="profile-stats">
+                <div class="stat">
+                    <span class="stat-number">{{ user.post_count }}</span>
+                    <span class="stat-label">Paylaşım</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">{{ user.login_count }}</span>
+                    <span class="stat-label">Giriş</span>
+                </div>
+                <div class="stat">
+                    <span class="stat-number">
+                        {% if user.created_at %}
+                            {% if user.created_at is string %}
+                                {{ user.created_at[:10] }}
+                            {% else %}
+                                {{ user.created_at.strftime('%d.%m.%Y') }}
+                            {% endif %}
+                        {% else %}
+                            Bilinmiyor
+                        {% endif %}
+                    </span>
+                    <span class="stat-label">Üyelik</span>
+                </div>
+            </div>
+        </div>
+        <div class="profile-actions">
+            <a href="{{ url_for('edit_profile') }}" class="btn">Profili Düzenle</a>
+        </div>
+    </div>
+
+    <div class="profile-content">
+        <h2>Paylaşımlarım</h2>
+        {% if posts %}
+            <div class="posts-grid">
+                {% for post in posts %}
+                <div class="post-card">
+                    <h3>{{ post.title }}</h3>
+                    <p class="post-date">
+                        {% if post.created_at %}
+                            {% if post.created_at is string %}
+                                {{ post.created_at[:16] }}
+                            {% else %}
+                                {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                            {% endif %}
+                        {% else %}
+                            Tarih bilinmiyor
+                        {% endif %}
+                    </p>
+                    {% if post.post_type == 'photo' and post.image_path %}
+                        <div class="post-image">
+                            <img src="{{ url_for('static', filename=post.image_path) }}" alt="{{ post.title }}">
+                        </div>
+                    {% elif post.post_type == 'mixed' and post.image_path %}
+                        <div class="post-content">
+                            <p>{{ post.content[:100] }}{% if post.content|length > 100 %}...{% endif %}</p>
+                            <div class="post-image">
+                                <img src="{{ url_for('static', filename=post.image_path) }}" alt="{{ post.title }}">
+                            </div>
+                        </div>
+                    {% else %}
+                        <div class="post-content">
+                            <p>{{ post.content[:200] }}{% if post.content|length > 200 %}...{% endif %}</p>
+                        </div>
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="empty-state">
+                <p>Henüz paylaşım yapmamışsınız.</p>
+                <a href="{{ url_for('index') }}" class="btn">İlk paylaşımınızı yapın</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
+

@@ -1,0 +1,166 @@
+{% extends 'base.html' %}
+{% block title %}Admin Dashboard{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+    <h1>Admin Dashboard</h1>
+    
+    <!-- İstatistik Kartları -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">👥</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_users }}</h3>
+                <p>Toplam Kullanıcı</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📝</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_posts }}</h3>
+                <p>Toplam Paylaşım</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📢</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_announcements }}</h3>
+                <p>Duyuru</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📅</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_events }}</h3>
+                <p>Etkinlik</p>
+            </div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">💬</div>
+            <div class="stat-content">
+                <h3>{{ stats.total_contacts }}</h3>
+                <p>İletişim Mesajı</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Kullanıcı Rolleri -->
+    <div class="role-stats">
+        <h2>Kullanıcı Rolleri</h2>
+        <div class="role-grid">
+            <div class="role-card admin">
+                <h3>{{ stats.admin_users }}</h3>
+                <p>Admin</p>
+            </div>
+            <div class="role-card manager">
+                <h3>{{ stats.manager_users }}</h3>
+                <p>Yönetici</p>
+            </div>
+            <div class="role-card user">
+                <h3>{{ stats.regular_users }}</h3>
+                <p>Kullanıcı</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Son Aktiviteler -->
+    <div class="recent-activities">
+        <div class="activity-section">
+            <h2>Son Paylaşımlar</h2>
+            {% if recent_posts %}
+                <div class="activity-list">
+                    {% for post in recent_posts %}
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <h4>{{ post.title }}</h4>
+                            <p>
+                                {% if post.created_at %}
+                                    {% if post.created_at is string %}
+                                        {{ post.created_at[:16] }}
+                                    {% else %}
+                                        {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+                                    {% endif %}
+                                {% else %}
+                                    Tarih bilinmiyor
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">Henüz paylaşım yok.</p>
+            {% endif %}
+        </div>
+
+        <div class="activity-section">
+            <h2>Son Kayıtlar</h2>
+            {% if recent_users %}
+                <div class="activity-list">
+                    {% for user in recent_users %}
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <h4>{{ user.username }}</h4>
+                            <p>{{ user.role|title }} - 
+                                {% if user.created_at %}
+                                    {% if user.created_at is string %}
+                                        {{ user.created_at[:10] }}
+                                    {% else %}
+                                        {{ user.created_at.strftime('%d.%m.%Y') }}
+                                    {% endif %}
+                                {% else %}
+                                    Tarih bilinmiyor
+                                {% endif %}
+                            </p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">Henüz kullanıcı yok.</p>
+            {% endif %}
+        </div>
+
+        <div class="activity-section">
+            <h2>Son İletişim Mesajları</h2>
+            {% if recent_contacts %}
+                <div class="activity-list">
+                    {% for contact in recent_contacts %}
+                    <div class="activity-item">
+                        <div class="activity-content">
+                            <h4>{{ contact.name }}</h4>
+                            <p>{{ contact.email }} - {{ contact.message[:50] }}{% if contact.message|length > 50 %}...{% endif %}</p>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p class="empty-state">Henüz mesaj yok.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Hızlı Erişim -->
+    <div class="quick-actions">
+        <h2>Hızlı Erişim</h2>
+        <div class="action-buttons">
+            <a href="{{ url_for('admin_announcements') }}" class="action-btn">
+                <span class="btn-icon">📢</span>
+                Duyuru Yönetimi
+            </a>
+            <a href="{{ url_for('admin_events') }}" class="action-btn">
+                <span class="btn-icon">📅</span>
+                Etkinlik Yönetimi
+            </a>
+            <a href="{{ url_for('admin_users') }}" class="action-btn">
+                <span class="btn-icon">👥</span>
+                Kullanıcı Yönetimi
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}
+

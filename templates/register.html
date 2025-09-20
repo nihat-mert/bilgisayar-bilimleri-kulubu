@@ -1,0 +1,19 @@
+{% extends 'base.html' %}
+{% block title %}Kayıt Ol{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
+  <h2>Kayıt Ol</h2>
+  <form class="row" method="post" action="{{ url_for('register') }}">
+    <input type="text" name="username" placeholder="Kullanıcı adı (en az 3 karakter)" required minlength="3">
+    <input type="email" name="email" placeholder="E-posta adresi" required>
+    <input type="password" name="password" placeholder="Şifre (en az 6 karakter)" required minlength="6">
+    <button class="btn" type="submit">Kayıt Ol</button>
+  </form>
+  <div style="margin-top: 16px; padding: 12px; background: rgba(34,211,238,0.1); border-radius: 8px; font-size: 14px;">
+    <strong>Not:</strong> Her kullanıcı sadece bir hesap oluşturulabilir.
+  </div>
+  <p style="text-align: center; margin-top: 16px;">
+    <a href="{{ url_for('login') }}" class="btn secondary">Giriş Yap</a>
+  </p>
+</section>
+{% endblock %}

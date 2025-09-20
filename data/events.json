@@ -1,0 +1,16 @@
+[
+  {
+    "id": 2,
+    "title": "Yeni Etkinlik",
+    "date": "2025-10-01",
+    "description": "Ikinci test etkinligi",
+    "created_at": "2025-09-20T05:39:51.255219"
+  },
+  {
+    "id": 2,
+    "title": "SelamSelamSelamSelamSelamSelam",
+    "date": "2025-09-07",
+    "description": "SelamSelamSelamSelamSelamSelam",
+    "created_at": "2025-09-20T05:40:28.477710"
+  }
+]

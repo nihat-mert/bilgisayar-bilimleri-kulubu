@@ -1,0 +1,238 @@
+{% extends 'base.html' %}
+{% block title %}Ana Sayfa{% endblock %}
+{% block content %}
+
+{% if session.get('user_id') %}
+<section class="card" style="margin-top: 20px;">
+  <h2>Yeni Paylaşım Ekle</h2>
+  
+  <!-- Paylaşım Türü Seçimi -->
+  <div class="post-type-selector" style="margin-bottom: 20px;">
+    <label style="display: block; margin-bottom: 10px; font-weight: 600;">Paylaşım Türü:</label>
+    <div style="display: flex; gap: 15px; flex-wrap: wrap;">
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="radio" name="post_type" value="mixed" checked>
+        <span>📝 Foto + Yazı</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="radio" name="post_type" value="text">
+        <span>📄 Sadece Yazı</span>
+      </label>
+      <label style="display: flex; align-items: center; gap: 5px; cursor: pointer;">
+        <input type="radio" name="post_type" value="photo">
+        <span>📷 Sadece Foto</span>
+      </label>
+    </div>
+  </div>
+
+  <form class="row" action="{{ url_for('add_post') }}" method="post" enctype="multipart/form-data" id="post-form">
+    <input type="hidden" name="post_type" id="post_type_input" value="mixed">
+    
+    <!-- Başlık Alanı (Sadece mixed için) -->
+    <div id="title-section" style="display: none;">
+      <input type="text" name="title" placeholder="Başlık girin..." id="title-input">
+    </div>
+    
+    <!-- Yazı Alanı -->
+    <div id="content-section">
+      <textarea name="content" placeholder="İçeriğinizi buraya yazın..." id="content-textarea"></textarea>
+    </div>
+    
+    <!-- Fotoğraf Alanı -->
+    <div id="image-section" style="display: none;">
+      <div class="upload-area" id="image-upload-area">
+        <p>Fotoğrafı buraya sürükleyin veya tıklayın</p>
+        <input type="file" name="image" accept="image/*" id="image-input" style="display: none;">
+      </div>
+      <div id="image-preview" class="image-preview"></div>
+    </div>
+    
+    <button class="btn" type="submit" id="submit-btn">Paylaşımı Yayınla</button>
+  </form>
+</section>
+{% endif %}
+
+<!-- Paylaşımlar -->
+<section class="posts-section" style="margin-top: 20px;">
+  <h2>Son Paylaşımlar</h2>
+  <div class="posts-grid">
+    {% for post in posts %}
+      <article class="post-card {{ post.post_type }}">
+        <div class="post-header">
+          <h3>{{ post.username }}</h3>
+          {% if post.title %}
+          <h4 class="post-title">{{ post.title }}</h4>
+          {% endif %}
+          {% if session.get('user_id') == post.user_id or session.get('role') == 'admin' %}
+          <div class="post-actions">
+            <form method="post" action="{{ url_for('delete_post', post_id=post.id) }}" style="display: inline;" onsubmit="return confirm('Bu paylaşımı silmek istediğinizden emin misiniz?')">
+              <button type="submit" class="btn-delete" title="Sil">🗑️</button>
+            </form>
+          </div>
+          {% endif %}
+        </div>
+        
+        {% if post.post_type == 'mixed' %}
+          <div class="post-content">
+            <div class="post-text">
+              <p>{{ post.content }}</p>
+            </div>
+            {% if post.image %}
+              <div class="post-image">
+                <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Paylaşım fotoğrafı">
+              </div>
+            {% endif %}
+          </div>
+        {% elif post.post_type == 'text' %}
+          <div class="post-content">
+            <p>{{ post.content }}</p>
+          </div>
+        {% elif post.post_type == 'photo' and post.image %}
+          <div class="post-content">
+            <div class="post-image-large">
+              <img src="{{ url_for('static', filename='uploads/' + post.image) }}" alt="Paylaşım fotoğrafı">
+            </div>
+          </div>
+        {% endif %}
+        
+        <div class="post-meta">
+          <small class="muted">
+            {% if post.created_at %}
+              {% if post.created_at is string %}
+                {{ post.created_at[:16] }}
+              {% else %}
+                {{ post.created_at.strftime('%d.%m.%Y %H:%M') }}
+              {% endif %}
+            {% else %}
+              Tarih bilinmiyor
+            {% endif %}
+          </small>
+        </div>
+      </article>
+    {% else %}
+      <p class="muted">Henüz paylaşım yok.</p>
+    {% endfor %}
+  </div>
+</section>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const postTypeRadios = document.querySelectorAll('input[name="post_type"]');
+  const postTypeInput = document.getElementById('post_type_input');
+  const titleSection = document.getElementById('title-section');
+  const contentSection = document.getElementById('content-section');
+  const imageSection = document.getElementById('image-section');
+  const titleInput = document.getElementById('title-input');
+  const contentTextarea = document.getElementById('content-textarea');
+  const imageUploadArea = document.getElementById('image-upload-area');
+  const imageInput = document.getElementById('image-input');
+  const imagePreview = document.getElementById('image-preview');
+  const submitBtn = document.getElementById('submit-btn');
+
+  // Paylaşım türü değişikliği
+  postTypeRadios.forEach(radio => {
+    radio.addEventListener('change', () => {
+      const type = radio.value;
+      postTypeInput.value = type;
+      
+      // Alanları göster/gizle
+      if (type === 'text') {
+        titleSection.style.display = 'none';
+        contentSection.style.display = 'block';
+        imageSection.style.display = 'none';
+        titleInput.required = false;
+        contentTextarea.required = true;
+      } else if (type === 'photo') {
+        titleSection.style.display = 'none';
+        contentSection.style.display = 'none';
+        imageSection.style.display = 'block';
+        titleInput.required = false;
+        contentTextarea.required = false;
+      } else { // mixed
+        titleSection.style.display = 'block';
+        contentSection.style.display = 'block';
+        imageSection.style.display = 'block';
+        titleInput.required = true;
+        contentTextarea.required = true;
+      }
+      
+      // Form validasyonunu güncelle
+      updateSubmitButton();
+    });
+  });
+
+  // Fotoğraf yükleme
+  if (imageUploadArea && imageInput) {
+    imageUploadArea.addEventListener('click', () => imageInput.click());
+    imageUploadArea.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      imageUploadArea.classList.add('dragover');
+    });
+    imageUploadArea.addEventListener('dragleave', () => {
+      imageUploadArea.classList.remove('dragover');
+    });
+    imageUploadArea.addEventListener('drop', (e) => {
+      e.preventDefault();
+      imageUploadArea.classList.remove('dragover');
+      handleImageFile(e.dataTransfer.files[0]);
+    });
+
+    imageInput.addEventListener('change', (e) => {
+      if (e.target.files[0]) {
+        handleImageFile(e.target.files[0]);
+      }
+    });
+  }
+
+  function handleImageFile(file) {
+    if (file && file.type.startsWith('image/')) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        imagePreview.innerHTML = `
+          <div class="preview-image">
+            <img src="${e.target.result}" alt="Önizleme">
+            <button type="button" onclick="removeImage()" class="remove-btn">×</button>
+          </div>
+        `;
+        updateSubmitButton();
+      };
+      reader.readAsDataURL(file);
+    }
+  }
+
+  window.removeImage = () => {
+    imagePreview.innerHTML = '';
+    imageInput.value = '';
+    updateSubmitButton();
+  };
+
+  function updateSubmitButton() {
+    const type = postTypeInput.value;
+    let isValid = true;
+    
+    if (type === 'text') {
+      isValid = contentTextarea.value.trim() !== '';
+    } else if (type === 'photo') {
+      isValid = imageInput.files.length > 0;
+    } else if (type === 'mixed') {
+      isValid = titleInput.value.trim() !== '' && contentTextarea.value.trim() !== '' && imageInput.files.length > 0;
+    }
+    
+    submitBtn.disabled = !isValid;
+  }
+
+  // Form değişikliklerini dinle
+  if (contentTextarea) {
+    contentTextarea.addEventListener('input', updateSubmitButton);
+  }
+  if (titleInput) {
+    titleInput.addEventListener('input', updateSubmitButton);
+  }
+});
+</script>
+{% endblock %}
+
+

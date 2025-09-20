@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bilgisayar Bilimleri Kulübü - {% block title %}{% endblock %}</title>
+    <meta name="description" content="{% block description %}Bilgisayar Bilimleri Kulübü resmi web sitesi. Siber güvenlik, web tasarımı, yapay zeka ve oyun geliştirme bölümleri.{% endblock %}">
+    <meta name="keywords" content="bilgisayar bilimleri, siber güvenlik, web tasarımı, yapay zeka, oyun geliştirme, programlama, teknoloji">
+    <meta name="author" content="Bilgisayar Bilimleri Kulübü">
+    <meta property="og:title" content="Bilgisayar Bilimleri Kulübü - {{ self.title() }}">
+    <meta property="og:description" content="{{ self.description() }}">
+    <meta property="og:type" content="website">
+    <meta property="og:url" content="{{ request.url }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Bilgisayar Bilimleri Kulübü - {{ self.title() }}">
+    <meta name="twitter:description" content="{{ self.description() }}">
+    <link rel="icon" href="{{ url_for('static', filename='uploads/placeholder-1.svg') }}">
+    <link rel="canonical" href="{{ request.url }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container header-inner">
+            <div class="brand">
+                <a href="{{ url_for('index') }}">
+                    <img src="{{ url_for('static', filename='logo.svg') }}" alt="Logo" class="logo">
+                    Bilgisayar Bilimleri Kulübü
+                </a>
+            </div>
+            <nav class="navbar" id="nav-menu">
+                <ul class="nav-list">
+                    <li><a href="{{ url_for('index') }}">Ana Sayfa</a></li>
+                    <li><a href="{{ url_for('announcements') }}">Duyurular</a></li>
+                    <li class="has-dropdown">
+                        <a href="#">Bölümler</a>
+                        <ul class="dropdown">
+                            <li><a href="{{ url_for('security_department') }}">Siber Güvenlik</a></li>
+                            <li><a href="{{ url_for('web_department') }}">Web Tasarımı</a></li>
+                            <li><a href="{{ url_for('ai_department') }}">Yapay Zeka</a></li>
+                            <li><a href="{{ url_for('games_department') }}">Oyun ve Uygulama Geliştirme</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="{{ url_for('contact') }}">İletişim</a></li>
+                    <li><a href="{{ url_for('events') }}">Etkinlikler</a></li>
+                    {% if session.get('user_id') %}
+                    <li class="has-dropdown">
+                        <a href="#">{{ session.get('username', 'Kullanıcı') }}</a>
+                        <ul class="dropdown">
+                            <li><a href="{{ url_for('profile') }}">Profilim</a></li>
+                            {% if session.get('role') == 'admin' %}
+                            <li><a href="{{ url_for('admin_dashboard') }}">Admin Dashboard</a></li>
+                            <li><a href="{{ url_for('admin_announcements') }}">Duyuru Yönetimi</a></li>
+                            <li><a href="{{ url_for('admin_events') }}">Etkinlik Yönetimi</a></li>
+                            <li><a href="{{ url_for('admin_users') }}">Kullanıcı Yönetimi</a></li>
+                            {% elif session.get('role') == 'manager' %}
+                            <li><a href="{{ url_for('manager_panel') }}">Yönetici Panel</a></li>
+                            {% endif %}
+                            <li>
+                                <form method="post" action="{{ url_for('logout') }}" style="display: inline;">
+                                    <button class="btn secondary" type="submit">Çıkış</button>
+                                </form>
+                            </li>
+                        </ul>
+                    </li>
+                    {% else %}
+                    <li><a href="{{ url_for('login') }}">Giriş</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <main class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="flash-wrapper">
+                    {% for category, message in messages %}
+                        <div class="flash {{ category }}">{{ message }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        {% block content %}{% endblock %}
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>© 2024 Bilgisayar Bilimleri Kulübü</p>
+        </div>
+    </footer>
+    <button class="btn theme-toggle" id="theme-toggle" title="Tema değiştir">Tema</button>
+    {% block extra_scripts %}{% endblock %}
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+<!-- Daha fazla kod olabilir -->
+</html>
+
+

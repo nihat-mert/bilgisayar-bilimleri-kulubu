@@ -1,0 +1,22 @@
+{% extends 'base.html' %}
+{% block title %}Giriş{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 40px; max-width: 400px; margin-left: auto; margin-right: auto;">
+  <h2>Giriş Yap</h2>
+  <form class="row" method="post" action="{{ url_for('login') }}">
+    <input type="text" name="username" placeholder="Kullanıcı adı" required>
+    <input type="password" name="password" placeholder="Şifre" required>
+    <button class="btn" type="submit">Giriş Yap</button>
+  </form>
+  <p style="text-align: center; margin-top: 16px;">
+    <a href="{{ url_for('register') }}" class="btn secondary">Kayıt Ol</a>
+  </p>
+</section>
+{% endblock %}
+
+
+
+
+
+
+

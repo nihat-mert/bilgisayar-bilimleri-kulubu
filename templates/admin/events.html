@@ -1,0 +1,34 @@
+{% extends 'base.html' %}
+{% block title %}Etkinlik Yönetimi{% endblock %}
+{% block content %}
+<section class="grid" style="margin-top:20px; grid-template-columns: 1fr 1fr;">
+  <div class="card">
+    <h2>Yeni Etkinlik</h2>
+    <form class="row" method="post" action="{{ url_for('admin_events') }}">
+      <input type="text" name="title" placeholder="Başlık" required>
+      <input type="date" name="date" required>
+      <textarea name="description" placeholder="Açıklama" required></textarea>
+      <button class="btn" type="submit">Ekle</button>
+    </form>
+  </div>
+  <div class="card">
+    <h2>Etkinlikler</h2>
+    <div class="grid">
+      {% for ev in events %}
+        <article class="card">
+          <h3>{{ ev.title }} — <span class="muted">{{ ev.date }}</span></h3>
+          <p>{{ ev.description }}</p>
+          <form method="post" action="{{ url_for('delete_event', event_id=ev.id) }}">
+            <button class="btn secondary" type="submit">Sil</button>
+          </form>
+        </article>
+      {% else %}
+        <p class="muted">Henüz etkinlik yok.</p>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+
+

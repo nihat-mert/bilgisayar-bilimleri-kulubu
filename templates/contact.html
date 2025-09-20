@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block title %}İletişim{% endblock %}
+{% block content %}
+<section class="card" style="margin-top: 20px;">
+  <h2>Bizimle İletişime Geçin</h2>
+  <form class="row" method="post" action="{{ url_for('contact') }}">
+    <input type="text" name="name" placeholder="Adınız" required>
+    <input type="email" name="email" placeholder="E-posta" required>
+    <textarea name="message" placeholder="Mesajınız" required></textarea>
+    <button class="btn" type="submit">Gönder</button>
+  </form>
+</section>
+{% endblock %}
+
+
+
