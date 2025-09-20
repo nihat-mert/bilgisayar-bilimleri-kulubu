@@ -32,7 +32,7 @@
               
               <!-- Şifre Değiştirme Formu -->
               <form method="post" action="{{ url_for('change_user_password', user_id=user.id) }}" style="display: flex; gap: 6px; align-items: center;">
-                <input type="password" name="password" placeholder="Yeni şifre (min 6 karakter)" style="flex: 1; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 4px 8px; font-size: 11px;" minlength="6" required>
+                <input type="password" name="password" placeholder="Yeni şifre (min 8 karakter)" style="flex: 1; background: var(--card); color: var(--text); border: 1px solid rgba(255,255,255,0.12); border-radius: 4px; padding: 4px 8px; font-size: 11px;" minlength="8" required>
                 <button type="submit" style="background: var(--accent); color: white; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; cursor: pointer;">Değiştir</button>
               </form>
             </div>
@@ -60,7 +60,17 @@
         <div style="font-size: 12px; color: var(--muted); margin-top: 12px; padding-top: 12px; border-top: 1px solid rgba(255,255,255,0.08);">
           <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
             <span>ID: {{ user.id }} | Kayıt: {{ user.id }}. kullanıcı</span>
-            <span style="color: var(--accent); font-weight: 600;">{{ user.last_login.strftime('%d.%m.%Y %H:%M') if user.last_login else 'Hiç giriş yapmamış' }}</span>
+            <span style="color: var(--accent); font-weight: 600;">
+              {% if user.last_login %}
+                {% if user.last_login is string %}
+                  {{ user.last_login[:16] }}
+                {% else %}
+                  {{ user.last_login.strftime('%d.%m.%Y %H:%M') }}
+                {% endif %}
+              {% else %}
+                Hiç giriş yapmamış
+              {% endif %}
+            </span>
           </div>
           
           <!-- İstatistikler -->
@@ -160,9 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
       const passwordInput = form.querySelector('input[name="password"]');
       const submitBtn = form.querySelector('button[type="submit"]');
       
-      if (passwordInput.value.length < 6) {
+      if (passwordInput.value.length < 8) {
         e.preventDefault();
-        alert('Şifre en az 6 karakter olmalıdır.');
+        alert('Şifre en az 8 karakter olmalıdır.');
         return;
       }
       
