@@ -1,0 +1,273 @@
+{% extends 'base.html' %}
+{% block title %}İletişim Mesajları - Admin{% endblock %}
+{% block content %}
+<div class="dashboard-container">
+  <div class="page-header">
+    <h1>İletişim Mesajları</h1>
+    <p>Gelen iletişim mesajlarını yönetin</p>
+  </div>
+
+  <!-- İstatistikler -->
+  <div class="stats-grid">
+    <div class="stat-card">
+      <div class="stat-icon">📧</div>
+      <div class="stat-content">
+        <h3>{{ stats.total }}</h3>
+        <p>Toplam Mesaj</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">🆕</div>
+      <div class="stat-content">
+        <h3>{{ stats.new }}</h3>
+        <p>Yeni Mesajlar</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">👁️</div>
+      <div class="stat-content">
+        <h3>{{ stats.read }}</h3>
+        <p>Okunmuş</p>
+      </div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-icon">✅</div>
+      <div class="stat-content">
+        <h3>{{ stats.replied }}</h3>
+        <p>Yanıtlanmış</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Mesaj Listesi -->
+  <div class="contacts-section">
+    <h2>Mesajlar</h2>
+    
+    {% if contacts %}
+      <div class="contacts-list">
+        {% for contact in contacts %}
+        <div class="contact-card {% if contact.status == 'new' %}new-message{% endif %}">
+          <div class="contact-header">
+            <div class="contact-info">
+              <h3>{{ contact.name }}</h3>
+              <p class="contact-email">{{ contact.email }}</p>
+              <p class="contact-subject">
+                <strong>Konu:</strong> 
+                {% if contact.subject == 'genel' %}Genel Bilgi
+                {% elif contact.subject == 'etkinlik' %}Etkinlik Hakkında
+                {% elif contact.subject == 'katilim' %}Topluluğa Katılım
+                {% elif contact.subject == 'sorun' %}Teknik Sorun
+                {% elif contact.subject == 'diger' %}Diğer
+                {% else %}{{ contact.subject }}
+                {% endif %}
+              </p>
+            </div>
+            <div class="contact-meta">
+              <span class="contact-date">{{ contact.created_at[:19].replace('T', ' ') }}</span>
+              <span class="contact-status status-{{ contact.status }}">
+                {% if contact.status == 'new' %}Yeni
+                {% elif contact.status == 'read' %}Okundu
+                {% elif contact.status == 'replied' %}Yanıtlandı
+                {% endif %}
+              </span>
+            </div>
+          </div>
+          
+          <div class="contact-message">
+            <p>{{ contact.message }}</p>
+          </div>
+          
+          <div class="contact-actions">
+            {% if contact.status == 'new' %}
+            <form method="post" action="{{ url_for('mark_contact_read', contact_id=contact.id) }}" style="display: inline;">
+              <button type="submit" class="btn btn-secondary">Okundu İşaretle</button>
+            </form>
+            {% endif %}
+            
+            <form method="post" action="{{ url_for('delete_contact', contact_id=contact.id) }}" style="display: inline;" 
+                  onsubmit="return confirm('Bu mesajı silmek istediğinizden emin misiniz?')">
+              <button type="submit" class="btn btn-danger">Sil</button>
+            </form>
+            
+            <a href="mailto:{{ contact.email }}?subject=Re: {{ contact.subject }}" class="btn btn-primary">E-posta Gönder</a>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="empty-state">
+        <p>Henüz iletişim mesajı bulunmuyor.</p>
+      </div>
+    {% endif %}
+  </div>
+</div>
+
+<style>
+.page-header {
+  margin-bottom: 32px;
+}
+
+.page-header h1 {
+  font-size: 2rem;
+  font-weight: 800;
+  margin-bottom: 8px;
+}
+
+.page-header p {
+  color: var(--muted);
+  font-size: 1.1rem;
+}
+
+.contacts-section {
+  margin-top: 40px;
+}
+
+.contacts-section h2 {
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin-bottom: 24px;
+}
+
+.contacts-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.contact-card {
+  background: var(--card);
+  border: 1px solid rgba(255,255,255,0.08);
+  border-radius: 16px;
+  padding: 24px;
+  transition: all 0.3s ease;
+}
+
+.contact-card.new-message {
+  border-left: 4px solid var(--primary);
+  background: rgba(34, 211, 238, 0.05);
+}
+
+.contact-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+}
+
+.contact-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.contact-info h3 {
+  margin: 0 0 4px 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text);
+}
+
+.contact-email {
+  margin: 0 0 8px 0;
+  color: var(--primary);
+  font-size: 0.9rem;
+}
+
+.contact-subject {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.contact-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.contact-date {
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.contact-status {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.status-new {
+  background: rgba(34, 211, 238, 0.2);
+  color: var(--primary);
+}
+
+.status-read {
+  background: rgba(156, 163, 175, 0.2);
+  color: var(--muted);
+}
+
+.status-replied {
+  background: rgba(16, 185, 129, 0.2);
+  color: #10b981;
+}
+
+.contact-message {
+  margin-bottom: 20px;
+  padding: 16px;
+  background: rgba(255,255,255,0.03);
+  border-radius: 12px;
+  border-left: 3px solid var(--primary);
+}
+
+.contact-message p {
+  margin: 0;
+  line-height: 1.6;
+  color: var(--text);
+  white-space: pre-wrap;
+}
+
+.contact-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.btn-danger {
+  background: #ef4444;
+  color: white;
+  border: none;
+  padding: 8px 16px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-weight: 600;
+  transition: all 0.2s;
+}
+
+.btn-danger:hover {
+  background: #dc2626;
+  transform: translateY(-1px);
+}
+
+@media (max-width: 768px) {
+  .contact-header {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .contact-meta {
+    align-items: flex-start;
+  }
+  
+  .contact-actions {
+    flex-direction: column;
+  }
+  
+  .contact-actions .btn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+</style>
+{% endblock %}

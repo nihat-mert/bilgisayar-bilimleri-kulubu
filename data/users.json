@@ -3,18 +3,18 @@
     "id": 1,
     "username": "mert",
     "email": "mertbiyik01@gmail.com",
-    "password": "34a367856776ac51178020f8d4ce6b0181e29fe8096e5dc6a514dbae22a3c3f2:46a55a2e0b778748a76eb45e9c7512f78bd86542f2708b22c5d20d065b23c72e",
+    "password": "e3a199eff6e0f561e7c4eaae08fe8305e22ab8bb2cbb239d00c9b5f5fe9ee1fb:ad8deeab092e0596020b30fd36d6705d873436a11f8269a4f1a66606fdbfd49e",
     "role": "admin",
     "created_at": "2025-09-20T05:09:54.564881",
-    "login_count": 2,
+    "login_count": 10,
     "post_count": 0,
-    "last_login": "2025-09-21T01:49:34.058149"
+    "last_login": "2025-10-02T17:38:47.869317"
   },
   {
     "id": 2,
     "username": "admin",
     "email": "admin@bilgisayarbilimleri.com",
-    "password": "9661ff3f718c1ed59faa175658d32593e38d425fd289067ec76427e3f35bb76f:8596b355c610c65c9428ab2b49969ee7e3872bf5d654dd2781f32da962d460bd",
+    "password": "7d153a16cf18ca42e8c3f43ad5cfccf8a3eb221b6e752d9eb624c621daf3d8b2:8b08d90939ccc1cab503f83aca087e23a2f7cbc05464c133cfc8edc2c12ead25",
     "role": "admin",
     "created_at": "2025-09-20T05:10:00.000000",
     "login_count": 0,

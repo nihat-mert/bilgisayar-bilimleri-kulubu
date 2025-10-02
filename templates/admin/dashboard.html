@@ -43,6 +43,9 @@
             <div class="stat-content">
                 <h3>{{ stats.total_contacts }}</h3>
                 <p>İletişim Mesajı</p>
+                {% if stats.new_contacts > 0 %}
+                <span class="new-badge">{{ stats.new_contacts }} yeni</span>
+                {% endif %}
             </div>
         </div>
     </div>
@@ -158,6 +161,13 @@
             <a href="{{ url_for('admin_users') }}" class="action-btn">
                 <span class="btn-icon">👥</span>
                 Kullanıcı Yönetimi
+            </a>
+            <a href="{{ url_for('admin_contacts') }}" class="action-btn">
+                <span class="btn-icon">💬</span>
+                İletişim Mesajları
+                {% if stats.new_contacts > 0 %}
+                <span class="notification-badge">{{ stats.new_contacts }}</span>
+                {% endif %}
             </a>
         </div>
     </div>

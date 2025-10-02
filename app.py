@@ -72,6 +72,7 @@ DATA_FOLDER = 'data'
 USERS_FILE = os.path.join(DATA_FOLDER, 'users.json')
 ANNOUNCEMENTS_FILE = os.path.join(DATA_FOLDER, 'announcements.json')
 EVENTS_FILE = os.path.join(DATA_FOLDER, 'events.json')
+CONTACTS_FILE = os.path.join(DATA_FOLDER, 'contacts.json')
 
 # Veri klasörünü oluştur
 os.makedirs(DATA_FOLDER, exist_ok=True)
@@ -188,8 +189,48 @@ def events_page():
     return redirect(url_for('events'))
 
 # İletişim
-@app.route('/contact')
+@app.route('/contact', methods=['GET', 'POST'])
 def contact():
+    if request.method == 'POST':
+        name = sanitize_input(request.form.get('name', ''))
+        email = sanitize_input(request.form.get('email', ''))
+        subject = sanitize_input(request.form.get('subject', ''))
+        message = sanitize_input(request.form.get('message', ''))
+        
+        # Input validasyonu
+        if not name or not email or not subject or not message:
+            flash('Tüm alanlar gereklidir!', 'error')
+            return render_template('contact.html')
+        
+        # Email validasyonu
+        email_pattern = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+        if not re.match(email_pattern, email):
+            flash('Geçerli bir email adresi girin!', 'error')
+            return render_template('contact.html')
+        
+        # İletişim mesajını JSON dosyasına kaydet
+        contacts = load_data(CONTACTS_FILE)
+        contact_data = {
+            'id': len(contacts) + 1,
+            'name': name,
+            'email': email,
+            'subject': subject,
+            'message': message,
+            'created_at': datetime.now().isoformat(),
+            'ip_address': request.remote_addr,
+            'status': 'new',  # new, read, replied
+            'replied_at': None
+        }
+        
+        contacts.append(contact_data)
+        save_data(CONTACTS_FILE, contacts)
+        
+        # Güvenlik loguna kaydet
+        security_logger.info(f"İletişim mesajı - Ad: {name}, Email: {email}, Konu: {subject}, IP: {request.remote_addr}")
+        
+        flash('Mesajınız başarıyla gönderildi! En kısa sürede size dönüş yapacağız.', 'success')
+        return redirect(url_for('contact'))
+    
     return render_template('contact.html')
 
 # Kullanıcı işlemleri
@@ -355,13 +396,16 @@ def admin_dashboard():
     users = load_data(USERS_FILE)
     announcements = load_data(ANNOUNCEMENTS_FILE)
     events = load_data(EVENTS_FILE)
+    contacts = load_data(CONTACTS_FILE)
+    posts = load_data('data/posts.json')
     
     stats = {
         'total_users': len(users),
         'total_announcements': len(announcements),
         'total_events': len(events),
-        'total_posts': 0,
-        'total_contacts': 0,
+        'total_posts': len(posts),
+        'total_contacts': len(contacts),
+        'new_contacts': len([c for c in contacts if c.get('status') == 'new']),
         'admin_users': len([u for u in users if u.get('role') == 'admin']),
         'manager_users': len([u for u in users if u.get('role') == 'manager']),
         'regular_users': len([u for u in users if u.get('role') == 'user'])
@@ -503,6 +547,63 @@ def delete_event(event_id):
         flash('Etkinlik bulunamadı!', 'error')
     
     return redirect(url_for('admin_events'))
+
+# İletişim mesajları yönetimi
+@app.route('/admin/contacts')
+def admin_contacts():
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Bu sayfaya erişim yetkiniz yok!', 'error')
+        return redirect(url_for('index'))
+    
+    contacts = load_data(CONTACTS_FILE)
+    # En yeni mesajlar önce gelsin
+    contacts.sort(key=lambda x: x.get('created_at', ''), reverse=True)
+    
+    # İstatistikler
+    stats = {
+        'total': len(contacts),
+        'new': len([c for c in contacts if c.get('status') == 'new']),
+        'read': len([c for c in contacts if c.get('status') == 'read']),
+        'replied': len([c for c in contacts if c.get('status') == 'replied'])
+    }
+    
+    return render_template('admin/contacts.html', contacts=contacts, stats=stats)
+
+@app.route('/admin/contacts/mark_read/<int:contact_id>', methods=['POST'])
+def mark_contact_read(contact_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Bu sayfaya erişim yetkiniz yok!', 'error')
+        return redirect(url_for('index'))
+    
+    contacts = load_data(CONTACTS_FILE)
+    contact = next((c for c in contacts if c['id'] == contact_id), None)
+    
+    if contact:
+        contact['status'] = 'read'
+        save_data(CONTACTS_FILE, contacts)
+        flash('Mesaj okundu olarak işaretlendi!', 'success')
+    else:
+        flash('Mesaj bulunamadı!', 'error')
+    
+    return redirect(url_for('admin_contacts'))
+
+@app.route('/admin/contacts/delete/<int:contact_id>', methods=['POST'])
+def delete_contact(contact_id):
+    if 'user_id' not in session or session.get('role') != 'admin':
+        flash('Bu sayfaya erişim yetkiniz yok!', 'error')
+        return redirect(url_for('index'))
+    
+    contacts = load_data(CONTACTS_FILE)
+    contact = next((c for c in contacts if c['id'] == contact_id), None)
+    
+    if contact:
+        contacts = [c for c in contacts if c['id'] != contact_id]
+        save_data(CONTACTS_FILE, contacts)
+        flash(f'"{contact["name"]}" mesajı silindi!', 'success')
+    else:
+        flash('Mesaj bulunamadı!', 'error')
+    
+    return redirect(url_for('admin_contacts'))
 
 # Paylaşım sistemi
 @app.route('/add_post', methods=['POST'])
@@ -676,10 +777,40 @@ def manager_panel():
     
     return render_template('manager/panel.html')
 
-# 404 hatası
+# Test routes for error pages
+@app.route('/test-500')
+def test_500():
+    # Simulate a 500 error
+    raise Exception("Test 500 error")
+
+@app.route('/test-400')
+def test_400():
+    # Simulate a 400 error
+    from flask import abort
+    abort(400)
+
+@app.route('/test-403')
+def test_403():
+    # Simulate a 403 error
+    from flask import abort
+    abort(403)
+
+# Hata sayfaları
 @app.errorhandler(404)
 def not_found(error):
     return render_template('404.html'), 404
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
+
+@app.errorhandler(403)
+def forbidden(error):
+    return render_template('403.html'), 403
+
+@app.errorhandler(400)
+def bad_request(error):
+    return render_template('400.html'), 400
 
 # Mevcut kullanıcıların şifrelerini güvenli hale getir
 def migrate_passwords():
